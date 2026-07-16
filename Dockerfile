@@ -13,30 +13,23 @@ RUN go build -o picoclaw .
 
 FROM alpine:latest
 
-
 RUN apk add --no-cache nginx
-
 
 WORKDIR /app
 
-
 COPY --from=builder /build/picoclaw /usr/local/bin/picoclaw
-
 
 COPY web /usr/share/nginx/html
 
+RUN mkdir -p /run/nginx
+
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
-COPY start.sh /start.sh
-
-RUN chmod +x /start.sh
-
+RUN chmod +x /usr/local/bin/picoclaw
 
 ENV PICOCLAW_GATEWAY_HOST=0.0.0.0
 ENV PICOCLAW_GATEWAY_PORT=18790
 
-
 EXPOSE 8000
 
-
-CMD ["/start.sh"]
+CMD nginx -g 'daemon off;' & picoclaw gateway
